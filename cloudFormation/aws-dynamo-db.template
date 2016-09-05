@@ -1,0 +1,108 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Creates DynamoDB Tables",
+	"Parameters": {
+		"ParentChildMapHashKeyElementName": {
+			"Default": "lb",
+			"Description": "HashType PrimaryKey Name",
+			"Type": "String",
+			"AllowedPattern": "[a-zA-Z0-9]*",
+			"MinLength": "1",
+			"MaxLength": "2048",
+			"ConstraintDescription": "must contain only alphanumberic characters"
+		},
+		"ParentChildMapRangeKeyElementName": {
+			"Default": "ub",
+			"Description": "RangeType PrimaryKey Name",
+			"Type": "String",
+			"AllowedPattern": "[a-zA-Z0-9]*",
+			"MinLength": "1",
+			"MaxLength": "2048",
+			"ConstraintDescription": "must contain only alphanumberic characters"
+		},
+		"ParentChildMapRangeKeyElementType": {
+			"Description": "RangeType PrimaryKey Type",
+			"Type": "String",
+			"Default": "S",
+			"AllowedPattern": "[S|N]",
+			"MinLength": "1",
+			"MaxLength": "1",
+			"ConstraintDescription": "must be either S or N"
+		},
+		"ParentChildMapHashKeyElementType": {
+			"Description": "HashType PrimaryKey Type",
+			"Type": "String",
+			"Default": "S",
+			"AllowedPattern": "[S|N]",
+			"MinLength": "1",
+			"MaxLength": "1",
+			"ConstraintDescription": "must be either S or N"
+		},
+		"ParentChildMapReadCapacityUnits": {
+			"Description": "Provisioned read throughput",
+			"Type": "Number",
+			"Default": "1",
+			"MinValue": "1",
+			"MaxValue": "10000",
+			"ConstraintDescription": "must be between 1 and 10000"
+		},
+		"ParentChildMapWriteCapacityUnits": {
+			"Description": "Provisioned write throughput",
+			"Type": "Number",
+			"Default": "1",
+			"MinValue": "1",
+			"MaxValue": "10000",
+			"ConstraintDescription": "must be between 1 and 10000"
+		}
+	},
+	"Resources": {
+		"ParentChildMapTable": {
+			"Type": "AWS::DynamoDB::Table",
+			"Properties": {
+				"TableName": "ParentChildMap",
+				"AttributeDefinitions": [{
+					"AttributeName": {
+						"Ref": "ParentChildMapHashKeyElementName"
+					},
+					"AttributeType": {
+						"Ref": "ParentChildMapHashKeyElementType"
+					}
+				}, {
+					"AttributeName": {
+						"Ref": "ParentChildMapRangeKeyElementName"
+					},
+					"AttributeType": {
+						"Ref": "ParentChildMapRangeKeyElementType"
+					}
+				}],
+				"KeySchema": [{
+					"AttributeName": {
+						"Ref": "ParentChildMapHashKeyElementName"
+					},
+					"KeyType": "HASH"
+				}, {
+					"AttributeName": {
+						"Ref": "ParentChildMapRangeKeyElementName"
+					},
+					"KeyType": "RANGE"
+				}],
+				"ProvisionedThroughput": {
+					"ReadCapacityUnits": {
+						"Ref": "ParentChildMapReadCapacityUnits"
+					},
+					"WriteCapacityUnits": {
+						"Ref": "ParentChildMapWriteCapacityUnits"
+					}
+				}
+			}
+		}
+	},
+	"Outputs": {
+		"ParentChildMapTableName": {
+			"Value": {
+				"Ref": "ParentChildMapTable"
+			},
+			"Description": "Parent Child Map Table"
+		}
+	}
+}

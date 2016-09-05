@@ -1,0 +1,298 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Creates API Gateway - POST",
+	"Parameters": {
+		"LambdaCodePackageS3Bucket": {
+			"Default": "lambdacodepackages3bucket",
+			"Description": "Lambda Code Package S3 Bucket that holds the Lambda code packages and API Gateway",
+			"Type": "String",
+			"AllowedPattern": "[a-zA-Z0-9]*",
+			"MinLength": "1",
+			"MaxLength": "2048",
+			"ConstraintDescription": "must contain only alphanumberic"
+		},
+		"CodePackageFileName": {
+			"Default": "persistData.jar",
+			"Description": "Lambda Code Package File Name",
+			"Type": "String",
+			"MinLength": "1",
+			"MaxLength": "2048"
+		}
+	},
+	"Resources": {
+		"ParentChildMapLambdaRole": {
+			"Properties": {
+				"AssumeRolePolicyDocument": {
+					"Statement": [{
+						"Action": [
+							"sts:AssumeRole"
+						],
+						"Effect": "Allow",
+						"Principal": {
+							"Service": [
+								"lambda.amazonaws.com"
+							]
+						}
+					}],
+					"Version": "2012-10-17"
+				},
+				"Path": "/",
+				"Policies": [{
+					"PolicyDocument": {
+						"Statement": [{
+							"Action": [
+								"logs:CreateLogGroup",
+								"logs:CreateLogStream",
+								"logs:PutLogEvents"
+							],
+							"Effect": "Allow",
+							"Resource": "*"
+						}],
+						"Version": "2012-10-17"
+					},
+					"PolicyName": "PersistParentChildMapLambdaAccessToCloudWatchLogs"
+				}, {
+					"PolicyDocument": {
+						"Statement": [{
+							"Action": [
+								"dynamodb:DeleteItem",
+								"dynamodb:GetItem",
+								"dynamodb:PutItem",
+								"dynamodb:Query",
+								"dynamodb:Scan",
+								"dynamodb:UpdateItem"
+							],
+							"Effect": "Allow",
+							"Resource": "*"
+						}],
+						"Version": "2012-10-17"
+					},
+					"PolicyName": "PersistParentChildMapLambdaAccessToDynamoDB"
+				}]
+			},
+			"Type": "AWS::IAM::Role"
+		},
+		"PersistParentChildMapLambda": {
+			"Properties": {
+				"Code": {
+					"S3Bucket": {
+						"Ref": "LambdaCodePackageS3Bucket"
+					},
+					"S3Key": {
+						"Ref": "CodePackageFileName"
+					}
+				},
+				"Description": "PersistParentChildMapLambda",
+				"FunctionName": "PersistParentChildMapLambda",
+				"Handler": "com.mobilesdk.lambda.PersistData",
+				"Role": {
+					"Fn::GetAtt": [
+						"ParentChildMapLambdaRole",
+						"Arn"
+					]
+				},
+				"Runtime": "java8",
+				"Timeout": "300",
+				"MemorySize": "1536"
+			},
+			"Type": "AWS::Lambda::Function"
+		},
+		"GetParentChildMapLambda": {
+			"Properties": {
+				"Code": {
+					"S3Bucket": {
+						"Ref": "LambdaCodePackageS3Bucket"
+					},
+					"S3Key": {
+						"Ref": "CodePackageFileName"
+					}
+				},
+				"Description": "GetParentChildMapLambda",
+				"FunctionName": "GetParentChildMapLambda",
+				"Handler": "com.mobilesdk.lambda.GetData",
+				"Role": {
+					"Fn::GetAtt": [
+						"ParentChildMapLambdaRole",
+						"Arn"
+					]
+				},
+				"Runtime": "java8",
+				"Timeout": "300",
+				"MemorySize": "1536"
+			},
+			"Type": "AWS::Lambda::Function"
+		},
+		"ParentChildMapApi": {
+			"Properties": {
+				"Description": "ParentChildMapApi",
+				"Name": "ParentChildMapApi"
+			},
+			"Type": "AWS::ApiGateway::RestApi"
+		},
+		"ParentChildMapPath": {
+			"Properties": {
+				"ParentId": {
+					"Fn::GetAtt": [
+						"ParentChildMapApi",
+						"RootResourceId"
+					]
+				},
+				"PathPart": "parentchildmap",
+				"RestApiId": {
+					"Ref": "ParentChildMapApi"
+				}
+			},
+			"Type": "AWS::ApiGateway::Resource"
+		},
+		"PersistParentChildMapApiPostMethod": {
+			"Properties": {
+				"AuthorizationType": "NONE",
+				"HttpMethod": "POST",
+				"Integration": {
+					"IntegrationHttpMethod": "POST",
+					"IntegrationResponses": [{
+						"StatusCode": "200"
+					}],
+					"Type": "AWS",
+					"Uri": {
+						"Fn::Join": [
+							"", [
+								"arn:aws:apigateway:", {
+									"Ref": "AWS::Region"
+								},
+								":lambda:path/2015-03-31/functions/", {
+									"Fn::GetAtt": [
+										"PersistParentChildMapLambda",
+										"Arn"
+									]
+								},
+								"/invocations"
+							]
+						]
+					}
+				},
+				"MethodResponses": [{
+					"StatusCode": "200"
+				}],
+				"RequestParameters": {
+					"method.request.querystring.name": "True"
+				},
+				"ResourceId": {
+					"Ref": "ParentChildMapPath"
+				},
+				"RestApiId": {
+					"Ref": "ParentChildMapApi"
+				}
+			},
+			"Type": "AWS::ApiGateway::Method"
+		},
+		"GetParentChildMapApiGetMethod": {
+			"Properties": {
+				"AuthorizationType": "NONE",
+				"HttpMethod": "GET",
+				"Integration": {
+					"RequestTemplates": {
+						"application/json": "{}"
+					},
+					"IntegrationHttpMethod": "POST",
+					"IntegrationResponses": [{
+						"StatusCode": "200"
+					}],
+					"Type": "AWS",
+					"Uri": {
+						"Fn::Join": [
+							"", [
+								"arn:aws:apigateway:", {
+									"Ref": "AWS::Region"
+								},
+								":lambda:path/2015-03-31/functions/", {
+									"Fn::GetAtt": [
+										"GetParentChildMapLambda",
+										"Arn"
+									]
+								},
+								"/invocations"
+							]
+						]
+					}
+				},
+				"MethodResponses": [{
+					"StatusCode": "200"
+				}],
+				"ResourceId": {
+					"Ref": "ParentChildMapPath"
+				},
+				"RestApiId": {
+					"Ref": "ParentChildMapApi"
+				}
+			},
+			"Type": "AWS::ApiGateway::Method"
+		},
+		"ParentChildMapApiDeployment": {
+			"Type": "AWS::ApiGateway::Deployment",
+			"Properties": {
+				"Description": "ParentChildMapApi Deployment",
+				"RestApiId": {
+					"Ref": "ParentChildMapApi"
+				},
+				"StageName": "production"
+			},
+			"DependsOn": [
+				"PersistParentChildMapApiPostMethod",
+				"GetParentChildMapApiGetMethod"
+			]
+		},
+		"PersistParentChildMapApiGatewayToLambdaPermission": {
+			"Type": "AWS::Lambda::Permission",
+			"Properties": {
+				"Action": "lambda:invokeFunction",
+				"FunctionName": {
+					"Ref": "PersistParentChildMapLambda"
+				},
+				"Principal": "apigateway.amazonaws.com",
+				"SourceArn": {
+					"Fn::Join": [
+						"", [
+							"arn:aws:execute-api:", {
+								"Ref": "AWS::Region"
+							},
+							":", {
+								"Ref": "AWS::AccountId"
+							},
+							":", {
+								"Ref": "ParentChildMapApi"
+							},
+							"/*"
+						]
+					]
+				}
+			}
+		},
+		"GetParentChildMapApiGatewayToLambdaPermission": {
+			"Type": "AWS::Lambda::Permission",
+			"Properties": {
+				"Action": "lambda:invokeFunction",
+				"FunctionName": {
+					"Ref": "GetParentChildMapLambda"
+				},
+				"Principal": "apigateway.amazonaws.com",
+				"SourceArn": {
+					"Fn::Join": [
+						"", [
+							"arn:aws:execute-api:", {
+								"Ref": "AWS::Region"
+							},
+							":", {
+								"Ref": "AWS::AccountId"
+							},
+							":", {
+								"Ref": "ParentChildMapApi"
+							},
+							"/*"
+						]
+					]
+				}
+			}
+		}
+	}
+}
