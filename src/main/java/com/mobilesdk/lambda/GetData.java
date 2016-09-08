@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.amazonaws.regions.Region;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ScanRequest;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
@@ -15,13 +12,11 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.mobilesdk.lambda.bean.GetRequest;
 import com.mobilesdk.lambda.bean.GetResponse;
 import com.mobilesdk.lambda.bean.PersistRequest;
-import com.mobilesdk.lambda.constants.Constants;
 
-public class GetData implements RequestHandler<GetRequest, GetResponse> {
-
-	private AmazonDynamoDBClient client;
+public class GetData extends Base implements RequestHandler<GetRequest, GetResponse> {
 
 	public GetResponse handleRequest(final GetRequest request, final Context context) {
+		this.context = context;
 		this.initDynamoDbClient();
 		GetResponse response = new GetResponse();
 		try {
@@ -43,9 +38,9 @@ public class GetData implements RequestHandler<GetRequest, GetResponse> {
 		PersistRequest request = null;
 
 		ScanRequest scanRequest = new ScanRequest();
-		scanRequest.withTableName(Constants.DYNAMODB_TABLE_NAME);
+		scanRequest.withTableName(DYNAMODB_TABLE_NAME);
 		ScanResult scan = client.scan(scanRequest);
-		System.out.println("scan: " + scan.getCount());
+		context.getLogger().log("scan: " + scan.getCount());
 		List<Map<String, AttributeValue>> items = scan.getItems();
 		for (Map<String, AttributeValue> item : items) {
 			request = new PersistRequest();
@@ -55,10 +50,5 @@ public class GetData implements RequestHandler<GetRequest, GetResponse> {
 		}
 
 		return parentChildMappingList;
-	}
-
-	private void initDynamoDbClient() {
-		client = new AmazonDynamoDBClient();
-		client.setRegion(Region.getRegion(Regions.AP_SOUTHEAST_1));
 	}
 }

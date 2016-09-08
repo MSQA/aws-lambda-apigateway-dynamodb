@@ -43,7 +43,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>persistData</finalName>
+		<finalName>persistData-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
