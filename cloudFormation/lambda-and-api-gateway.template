@@ -1,6 +1,6 @@
 {
 	"AWSTemplateFormatVersion": "2010-09-09",
-	"Description": "Creates API Gateway - POST",
+	"Description": "Creates API Gateway - ParentChildMap",
 	"Parameters": {
 		"LambdaCodePackageS3Bucket": {
 			"Default": "lambdacodepackages3bucket",
@@ -12,7 +12,7 @@
 			"ConstraintDescription": "must contain only alphanumberic"
 		},
 		"CodePackageFileName": {
-			"Default": "persistData.jar",
+			"Default": "persistData-0.0.1-SNAPSHOT.jar",
 			"Description": "Lambda Code Package File Name",
 			"Type": "String",
 			"MinLength": "1",
@@ -50,7 +50,7 @@
 						}],
 						"Version": "2012-10-17"
 					},
-					"PolicyName": "PersistParentChildMapLambdaAccessToCloudWatchLogs"
+					"PolicyName": "ParentChildMapLambdaAccessToCloudWatchLogs"
 				}, {
 					"PolicyDocument": {
 						"Statement": [{
@@ -67,7 +67,7 @@
 						}],
 						"Version": "2012-10-17"
 					},
-					"PolicyName": "PersistParentChildMapLambdaAccessToDynamoDB"
+					"PolicyName": "ParentChildMapLambdaAccessToDynamoDB"
 				}]
 			},
 			"Type": "AWS::IAM::Role"

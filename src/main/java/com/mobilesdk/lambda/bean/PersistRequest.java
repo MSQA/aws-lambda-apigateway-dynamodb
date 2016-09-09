@@ -1,36 +1,38 @@
 package com.mobilesdk.lambda.bean;
 
+import java.math.BigDecimal;
+
 import com.google.gson.Gson;
 
 public class PersistRequest {
-	private String parentId;
-	private String childId;
-	
-	public static void main(String[] args) {
-		PersistRequest request = new PersistRequest();
-		request.setParentId("1");
-		request.setChildId("2");
-		System.out.println(request);
-	}
+    private BigDecimal parentId;
+    private BigDecimal childId;
 
-	public String getParentId() {
-		return parentId;
-	}
+    public static void main(String[] args) {
+        PersistRequest request = new PersistRequest();
+        request.setParentId(new BigDecimal(1));
+        request.setChildId(new BigDecimal(2));
+        System.out.println(request);
+    }
 
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
+    public BigDecimal getParentId() {
+        return parentId;
+    }
 
-	public String getChildId() {
-		return childId;
-	}
+    public void setParentId(BigDecimal parentId) {
+        this.parentId = parentId;
+    }
 
-	public void setChildId(String childId) {
-		this.childId = childId;
-	}
+    public BigDecimal getChildId() {
+        return childId;
+    }
 
-	public String toString() {
-		final Gson gson = new Gson();
-		return gson.toJson(this);
-	}
+    public void setChildId(BigDecimal childId) {
+        this.childId = childId;
+    }
+
+    public String toString() {
+        final Gson gson = new Gson();
+        return gson.toJson(this);
+    }
 }

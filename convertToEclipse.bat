@@ -1,5 +1,5 @@
 @echo off
 
-call mvn eclipse:eclipse -U
+call mvn eclipse:eclipse
 
 pause

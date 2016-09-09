@@ -23,7 +23,7 @@
 		"ParentChildMapRangeKeyElementType": {
 			"Description": "RangeType PrimaryKey Type",
 			"Type": "String",
-			"Default": "S",
+			"Default": "N",
 			"AllowedPattern": "[S|N]",
 			"MinLength": "1",
 			"MaxLength": "1",
@@ -32,7 +32,7 @@
 		"ParentChildMapHashKeyElementType": {
 			"Description": "HashType PrimaryKey Type",
 			"Type": "String",
-			"Default": "S",
+			"Default": "N",
 			"AllowedPattern": "[S|N]",
 			"MinLength": "1",
 			"MaxLength": "1",
@@ -41,7 +41,7 @@
 		"ParentChildMapReadCapacityUnits": {
 			"Description": "Provisioned read throughput",
 			"Type": "Number",
-			"Default": "1",
+			"Default": "5",
 			"MinValue": "1",
 			"MaxValue": "10000",
 			"ConstraintDescription": "must be between 1 and 10000"
@@ -49,7 +49,7 @@
 		"ParentChildMapWriteCapacityUnits": {
 			"Description": "Provisioned write throughput",
 			"Type": "Number",
-			"Default": "1",
+			"Default": "5",
 			"MinValue": "1",
 			"MaxValue": "10000",
 			"ConstraintDescription": "must be between 1 and 10000"
